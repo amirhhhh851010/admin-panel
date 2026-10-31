@@ -1,4 +1,4 @@
-import { Status, Order } from "@/types/type";
+import { Order, Status } from "@/types/type";
 
 function switchedText(status: Status) {
   switch (status) {
@@ -36,7 +36,7 @@ const OrderRow = ({ id, date, name, status, total }: Order) => {
       <td>{name}</td>
       <td>{date}</td>
       <td className="">{switchedText(status)}</td>
-      <td>{total}</td>
+      <td>{status === "Cancelled" ? "-" : total}</td>
     </tr>
   );
 };
