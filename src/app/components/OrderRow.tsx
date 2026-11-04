@@ -1,4 +1,11 @@
-import { Order, Status } from "@/types/type";
+import { Status } from "@/types/type";
+interface OrderRowProps {
+  id: string;
+  name: string;
+  date: string;
+  status: Status;
+  total: string;
+}
 
 function switchedText(status: Status) {
   switch (status) {
@@ -29,7 +36,7 @@ function switchedText(status: Status) {
   }
 }
 
-const OrderRow = ({ id, date, name, status, total }: Order) => {
+const OrderRow = ({ id, date, name, status, total }: OrderRowProps) => {
   return (
     <tr>
       <th scope="row">{id}</th>

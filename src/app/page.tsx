@@ -3,7 +3,7 @@ import { useState } from "react";
 import FilterOrder from "./components/FilterOrder";
 import OrderRow from "./components/OrderRow";
 import StatCard from "./components/StatCard";
-import { Order, Status } from "@/types/type";
+import { Order, SortDirection, Status } from "@/types/type";
 
 const orders: Order[] = [
   {
@@ -11,58 +11,72 @@ const orders: Order[] = [
     name: "Alex Morgan",
     date: "Oct 12",
     status: "Completed",
-    total: "$240",
+    total: 240,
   },
   {
     id: "#1002",
     name: "Sarah Chen",
     date: "Oct 13",
     status: "Processing",
-    total: "$125",
+    total: 125,
   },
   {
     id: "#1003",
     name: "David Lee",
     date: "Oct 14",
     status: "Pending",
-    total: "$380",
+    total: 380,
   },
   {
     id: "#1004",
     name: "Bruse Lee",
     date: "Oct 14",
     status: "Cancelled",
-    total: "$380",
+    total: 380,
   },
   {
     id: "#1005",
     name: "Margarit banner",
     date: "Oct 14",
     status: "Completed",
-    total: "$380",
+    total: 380,
   },
   {
     id: "#1006",
     name: "Alex Morgan",
     date: "Oct 11",
     status: "Pending",
-    total: "$880",
+    total: 880,
   },
 ];
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedStatus, setSelectedStatus] = useState<Status | "All">("All");
+  const [selectedSort, setSelectedSort] = useState<SortDirection>("default");
 
-  const filterResult: Order[] = orders.filter((order) => {
-    const searchFilter = Object.values(order).some((value: string) =>
-      value.toLowerCase().includes(searchTerm.toLowerCase()),
+  const filterOrders: Order[] = orders.filter((order) => {
+    const searchFilter = Object.values(order).some((value) =>
+      String(value).toLowerCase().includes(searchTerm.trim().toLowerCase()),
     );
     const statusFilter =
       selectedStatus === "All" ? true : order.status === selectedStatus;
 
     return searchFilter && statusFilter;
   });
+  const sortedOrders: Order[] = (() => {
+    switch (selectedSort) {
+      case "default":
+        return filterOrders;
+      case "asc":
+      case "desc":
+        return [...filterOrders].sort((a, b) =>
+          selectedSort === "asc" ? a.total - b.total : b.total - a.total,
+        );
+      default:
+        return filterOrders;
+    }
+  })();
 
   function searchChangeHandler(e: React.ChangeEvent<HTMLInputElement>) {
     setSearchTerm(e.target.value);
@@ -70,9 +84,13 @@ export default function Home() {
   function statusChangeHandler(e: React.ChangeEvent<HTMLSelectElement>) {
     setSelectedStatus(e.target.value as Status | "All");
   }
+  function sortChangeHandler(e: React.ChangeEvent<HTMLSelectElement>) {
+    setSelectedSort(e.target.value as SortDirection);
+  }
   function resetClickHandler() {
     setSearchTerm("");
     setSelectedStatus("All");
+    setSelectedSort("default");
   }
 
   return (
@@ -90,9 +108,11 @@ export default function Home() {
         <FilterOrder
           termValue={searchTerm}
           statusValue={selectedStatus}
+          sortValue={selectedSort}
           onSearchChange={searchChangeHandler}
           onStatusChange={statusChangeHandler}
           onResetClick={resetClickHandler}
+          onSortChange={sortChangeHandler}
         />
         <div id="recent-orders">
           <table className="w-full [&_th]:text-left [&_th]:px-4 [&_td]:px-4 [&_th]:py-3 [&_td]:py-3 overflow-x-auto">
@@ -106,17 +126,23 @@ export default function Home() {
               </tr>
             </thead>
             <tbody>
-              {filterResult.length !== 0 ? (
-                filterResult.map((order) => (
-                  <OrderRow
-                    key={order.id}
-                    id={order.id}
-                    name={order.name}
-                    date={order.date}
-                    status={order.status}
-                    total={order.total}
-                  />
-                ))
+              {sortedOrders.length !== 0 ? (
+                sortedOrders.map((order) => {
+                  const formattedTotal = new Intl.NumberFormat("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                  }).format(order.total);
+                  return (
+                    <OrderRow
+                      key={order.id}
+                      id={order.id}
+                      name={order.name}
+                      date={order.date}
+                      status={order.status}
+                      total={formattedTotal}
+                    />
+                  );
+                })
               ) : (
                 <tr>
                   <td colSpan={5}>no orders found</td>
