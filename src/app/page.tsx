@@ -1,10 +1,14 @@
 "use client";
 import { useState } from "react";
 import FilterOrder from "./components/FilterOrder";
-import OrderRow from "./components/OrderRow";
 import StatCard from "./components/StatCard";
 import { Order, SortDirection, Status } from "@/types/type";
+import OrdersTable from "./components/OrdersTable";
 
+const totalFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+});
 const orders: Order[] = [
   {
     id: "#1001",
@@ -92,7 +96,32 @@ export default function Home() {
     setSelectedStatus("All");
     setSelectedSort("default");
   }
-
+  const totalSalesValue = () => {
+    const result = orders
+      .filter((order) => order.status === "Completed")
+      .reduce((acc, curr) => acc + curr.total, 0);
+    return totalFormatter.format(result);
+  };
+  const totalCustomersValue = () => {
+    let flag: string[] = [];
+    const result = orders.filter((order) => {
+      if (!flag.includes(order.name)) {
+        flag.push(order.name);
+        return true;
+      } else {
+        return false;
+      }
+    }).length;
+    return String(result);
+  };
+  const totalOrdersValue = () => {
+    const result = orders.length;
+    return String(result);
+  };
+  const totalPendingValue = () => {
+    const result = orders.filter((order) => order.status === "Pending").length;
+    return String(result);
+  };
   return (
     <>
       <div id="container" className="flex flex-col gap-6">
@@ -100,10 +129,26 @@ export default function Home() {
           id="cards"
           className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4"
         >
-          <StatCard title="Total Sales" value="$12,450" id="total-sales" />
-          <StatCard title="Total Products" value="48" id="total-products" />
-          <StatCard title="Total Orders" value="156" id="total-orders" />
-          <StatCard title="Pending Orders" value="12" id="pending-orders" />
+          <StatCard
+            title="Total Sales"
+            value={totalSalesValue()}
+            id="total-sales"
+          />
+          <StatCard
+            title="Total Customers"
+            value={totalCustomersValue()}
+            id="total-customers"
+          />
+          <StatCard
+            title="Total Orders"
+            value={totalOrdersValue()}
+            id="total-orders"
+          />
+          <StatCard
+            title="Pending Orders"
+            value={totalPendingValue()}
+            id="pending-orders"
+          />
         </div>
         <FilterOrder
           termValue={searchTerm}
@@ -114,43 +159,7 @@ export default function Home() {
           onResetClick={resetClickHandler}
           onSortChange={sortChangeHandler}
         />
-        <div id="recent-orders">
-          <table className="w-full [&_th]:text-left [&_th]:px-4 [&_td]:px-4 [&_th]:py-3 [&_td]:py-3 overflow-x-auto">
-            <thead className="border-b">
-              <tr>
-                <th scope="col">Order ID</th>
-                <th scope="col">Customer</th>
-                <th scope="col">Date</th>
-                <th scope="col">Status</th>
-                <th scope="col">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedOrders.length !== 0 ? (
-                sortedOrders.map((order) => {
-                  const formattedTotal = new Intl.NumberFormat("en-US", {
-                    style: "currency",
-                    currency: "USD",
-                  }).format(order.total);
-                  return (
-                    <OrderRow
-                      key={order.id}
-                      id={order.id}
-                      name={order.name}
-                      date={order.date}
-                      status={order.status}
-                      total={formattedTotal}
-                    />
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan={5}>no orders found</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <OrdersTable orders={sortedOrders} />
       </div>
     </>
   );
