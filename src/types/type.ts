@@ -1,4 +1,4 @@
-export type Status = "Processing" | "Pending" | "Completed" | "Cancelled";
+export type Status = "Pending" | "Processing" | "Completed" | "Cancelled";
 export type SortDirection = "default" | "asc" | "desc";
 
 export interface Order {

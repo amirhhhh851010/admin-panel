@@ -9,52 +9,52 @@ const totalFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
 });
-const orders: Order[] = [
-  {
-    id: "#1001",
-    name: "Alex Morgan",
-    date: "Oct 12",
-    status: "Completed",
-    total: 240,
-  },
-  {
-    id: "#1002",
-    name: "Sarah Chen",
-    date: "Oct 13",
-    status: "Processing",
-    total: 125,
-  },
-  {
-    id: "#1003",
-    name: "David Lee",
-    date: "Oct 14",
-    status: "Pending",
-    total: 380,
-  },
-  {
-    id: "#1004",
-    name: "Bruse Lee",
-    date: "Oct 14",
-    status: "Cancelled",
-    total: 380,
-  },
-  {
-    id: "#1005",
-    name: "Margarit banner",
-    date: "Oct 14",
-    status: "Completed",
-    total: 380,
-  },
-  {
-    id: "#1006",
-    name: "Alex Morgan",
-    date: "Oct 11",
-    status: "Pending",
-    total: 880,
-  },
-];
 
 export default function Home() {
+  const [orders, setOrders] = useState<Order[]>([
+    {
+      id: "#1001",
+      name: "Alex Morgan",
+      date: "Oct 12",
+      status: "Completed",
+      total: 240,
+    },
+    {
+      id: "#1002",
+      name: "Sarah Chen",
+      date: "Oct 13",
+      status: "Processing",
+      total: 125,
+    },
+    {
+      id: "#1003",
+      name: "David Lee",
+      date: "Oct 14",
+      status: "Pending",
+      total: 380,
+    },
+    {
+      id: "#1004",
+      name: "Bruse Lee",
+      date: "Oct 14",
+      status: "Cancelled",
+      total: 380,
+    },
+    {
+      id: "#1005",
+      name: "Margarit banner",
+      date: "Oct 14",
+      status: "Completed",
+      total: 380,
+    },
+    {
+      id: "#1006",
+      name: "Alex Morgan",
+      date: "Oct 11",
+      status: "Pending",
+      total: 880,
+    },
+  ]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedStatus, setSelectedStatus] = useState<Status | "All">("All");
   const [selectedSort, setSelectedSort] = useState<SortDirection>("default");
@@ -96,6 +96,14 @@ export default function Home() {
     setSelectedStatus("All");
     setSelectedSort("default");
   }
+  function statusUpdateHandler(orderID: string, newStatus: Status) {
+    setOrders((prev) =>
+      prev.map((order) =>
+        order.id === orderID ? { ...order, status: newStatus } : order,
+      ),
+    );
+  }
+
   const totalSalesValue = () => {
     const result = orders
       .filter((order) => order.status === "Completed")
@@ -122,6 +130,7 @@ export default function Home() {
     const result = orders.filter((order) => order.status === "Pending").length;
     return String(result);
   };
+
   return (
     <>
       <div id="container" className="flex flex-col gap-6">
@@ -159,7 +168,10 @@ export default function Home() {
           onResetClick={resetClickHandler}
           onSortChange={sortChangeHandler}
         />
-        <OrdersTable orders={sortedOrders} />
+        <OrdersTable
+          orders={sortedOrders}
+          onStatusUpdate={statusUpdateHandler}
+        />
       </div>
     </>
   );
