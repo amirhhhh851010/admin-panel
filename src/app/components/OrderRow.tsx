@@ -6,6 +6,7 @@ interface OrderRowProps {
   status: Status;
   total: string;
   onStatusUpdate: (orderID: string, newStatus: Status) => void;
+  onOrderDelete: (orderID: string) => void;
 }
 
 function getSelectStyle(status: Status) {
@@ -28,13 +29,14 @@ const OrderRow = ({
   status,
   total,
   onStatusUpdate,
+  onOrderDelete,
 }: OrderRowProps) => {
   return (
     <tr>
-      <th scope="row">{id}</th>
+      <th scope="row">#{id}</th>
       <td>{name}</td>
       <td>{date}</td>
-      <td className="">
+      <td>
         <select
           className={getSelectStyle(status)}
           value={status}
@@ -67,6 +69,15 @@ const OrderRow = ({
         </select>
       </td>
       <td>{status === "Cancelled" ? "-" : total}</td>
+      <td>
+        <button
+          className="bg-red-500 p-1 text-white border-2 border-black rounded-xl cursor-pointer"
+          onClick={() => onOrderDelete(id)}
+          type="button"
+        >
+          Delete
+        </button>
+      </td>
     </tr>
   );
 };
